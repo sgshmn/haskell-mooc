@@ -122,7 +122,17 @@ compose op1 op2 c = do
 --   ["module Set11b where","","import Control.Monad"]
 
 hFetchLines :: Handle -> IO [String]
-hFetchLines = todo
+hFetchLines h = do
+    i <- hIsEOF h
+    if i
+        then return []
+        else do
+            l <- hGetLine h
+            ls <- hFetchLines h
+            return (l:ls)
+
+
+
 
 ------------------------------------------------------------------------------
 -- Ex 6: Given a Handle and a list of line indexes, produce the lines
@@ -135,7 +145,11 @@ hFetchLines = todo
 -- handle.
 
 hSelectLines :: Handle -> [Int] -> IO [String]
-hSelectLines h nums = todo
+hSelectLines h nums = do
+    x <- hFetchLines h
+    return [x !! (i - 1) | i <- nums]
+
+
 
 ------------------------------------------------------------------------------
 -- Ex 7: In this exercise we see how a program can be split into a
@@ -176,4 +190,10 @@ counter ("print",n) = (True,show n,n)
 counter ("quit",n)  = (False,"bye bye",n)
 
 interact' :: ((String,st) -> (Bool,String,st)) -> st -> IO st
-interact' f state = todo
+interact' f state = do
+    l <- getLine
+    let (x,y,z) = f (l,state)
+    putStrLn y
+    if x
+        then interact' f z
+        else return z
