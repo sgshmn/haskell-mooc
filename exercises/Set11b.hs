@@ -20,7 +20,11 @@ import Mooc.Todo
 --   "xfoobarquux"
 
 appendAll :: IORef String -> [String] -> IO ()
-appendAll = todo
+appendAll a [] = return ()
+appendAll a (x:xs) = do
+    modifyIORef a (++ x)
+    appendAll a xs
+
 
 ------------------------------------------------------------------------------
 -- Ex 2: Given two IORefs, swap the values stored in them.
@@ -35,33 +39,39 @@ appendAll = todo
 --   "x"
 
 swapIORefs :: IORef a -> IORef a -> IO ()
-swapIORefs = todo
+swapIORefs a b = do
+    x <- readIORef a
+    y <- readIORef b
+    writeIORef a y
+    writeIORef b x
 
 ------------------------------------------------------------------------------
 -- Ex 3: sometimes one bumps into IO operations that return IO
 -- operations. For instance the type IO (IO Int) means an IO operation
 -- that returns an IO operation that returns an Int.
---
+
 -- Implement the function doubleCall which takes an operation op and
 --   1. runs op
 --   2. runs the operation returned by op
 --   3. returns the value returned by this operation
---
+
 -- Examples:
 --   - doubleCall (return (return 3)) is the same as return 3
---
+
 --   - let op :: IO (IO [String])
 --         op = do l <- readLn
 --                 return $ replicateM l getLine
 --     in doubleCall op
---
+
 --     works just like
---
+
 --     do l <- readLn
 --        replicateM l getLine
 
 doubleCall :: IO (IO a) -> IO a
-doubleCall op = todo
+doubleCall op = do
+    x <- op
+    x
 
 ------------------------------------------------------------------------------
 -- Ex 4: implement the analogue of function composition (the (.)
@@ -80,7 +90,9 @@ doubleCall op = todo
 --   3. return the result (of type b)
 
 compose :: (a -> IO b) -> (c -> IO a) -> c -> IO b
-compose op1 op2 c = todo
+compose op1 op2 c = do
+    x <- op2 c
+    op1 x
 
 ------------------------------------------------------------------------------
 -- Ex 5: Reading lines from a file. The module System.IO defines
