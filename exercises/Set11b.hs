@@ -24,6 +24,9 @@ appendAll a [] = return ()
 appendAll a (x:xs) = do
     modifyIORef a (++ x)
     appendAll a xs
+    
+-- appendAll s sa = forM_ sa (\x -> modifyIORef s (++x))
+
 
 
 ------------------------------------------------------------------------------
@@ -148,7 +151,10 @@ hSelectLines :: Handle -> [Int] -> IO [String]
 hSelectLines h nums = do
     x <- hFetchLines h
     return [x !! (i - 1) | i <- nums]
-
+-- hSelectLines h ia = do
+--     x <- hFetchLines h
+--     forM ia (\e -> return (x!!(e-1)))
+    
 
 
 ------------------------------------------------------------------------------
