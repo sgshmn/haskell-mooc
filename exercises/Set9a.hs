@@ -26,7 +26,10 @@ import Mooc.Todo
 -- Otherwise return "Ok."
 
 workload :: Int -> Int -> String
-workload nExercises hoursPerExercise = todo
+workload nExercises hoursPerExercise
+  | nExercises * hoursPerExercise > 100 = "Holy moly!"
+  | nExercises * hoursPerExercise < 10  = "Piece of cake!"
+  | otherwise                           = "Ok."
 
 ------------------------------------------------------------------------------
 -- Ex 2: Implement the function echo that builds a string like this:
@@ -39,7 +42,8 @@ workload nExercises hoursPerExercise = todo
 -- Hint: use recursion
 
 echo :: String -> String
-echo = todo
+echo "" = ""
+echo (x:xs) =  (x:xs) ++ ", " ++ echo xs
 
 ------------------------------------------------------------------------------
 -- Ex 3: A country issues some banknotes. The banknotes have a serial
@@ -52,7 +56,12 @@ echo = todo
 -- are valid.
 
 countValid :: [String] -> Int
-countValid = todo
+countValid []             = 0
+countValid (x:xs) = is_valid x + countValid xs
+  where is_valid (x1:x2:x3:x4:x5:x6:x7)
+          | x3 == x5 = 1
+          | x4 == x6 = 1
+          | otherwise = 0
 
 ------------------------------------------------------------------------------
 -- Ex 4: Find the first element that repeats two or more times _in a
@@ -64,7 +73,11 @@ countValid = todo
 --   repeated [1,2,1,2,3,3] ==> Just 3
 
 repeated :: Eq a => [a] -> Maybe a
-repeated = todo
+repeated [] = Nothing
+repeated [x] = Nothing
+repeated (x1:x2:xs)
+  | x1 == x2 = Just x1
+  | otherwise = repeated (x2:xs)
 
 ------------------------------------------------------------------------------
 -- Ex 5: A laboratory has been collecting measurements. Some of the
@@ -86,7 +99,11 @@ repeated = todo
 --     ==> Left "no data"
 
 sumSuccess :: [Either String Int] -> Either String Int
-sumSuccess = todo
+sumSuccess [] = Left "no data"
+sumSuccess (Left x:xs) = sumSuccess xs
+sumSuccess (Right x1:Left x2:xs) = sumSuccess(Right x1:xs)
+sumSuccess (Right x1:Right x2:xs) = sumSuccess(Right (x1 + x2):xs)
+sumSuccess [Right x] = Right x
 
 ------------------------------------------------------------------------------
 -- Ex 6: A combination lock can either be open or closed. The lock
@@ -108,30 +125,36 @@ sumSuccess = todo
 --   isOpen (open "0000" (lock (changeCode "0000" (open "1234" aLock)))) ==> True
 --   isOpen (open "1234" (lock (changeCode "0000" (open "1234" aLock)))) ==> False
 
-data Lock = LockUndefined
+data Lock = Lock String Bool
   deriving Show
 
 -- aLock should be a locked lock with the code "1234"
 aLock :: Lock
-aLock = todo
+aLock = Lock "1234" False
 
 -- isOpen returns True if the lock is open
 isOpen :: Lock -> Bool
-isOpen = todo
+isOpen (Lock a b) = b
 
 -- open tries to open the lock with the given code. If the code is
 -- wrong, nothing happens.
 open :: String -> Lock -> Lock
-open = todo
+open code (Lock a b)
+  | code == a = Lock a True
+  | otherwise = Lock a b
 
 -- lock closes a lock. If the lock is already closed, nothing happens.
 lock :: Lock -> Lock
-lock = todo
+lock (Lock a b)
+  | b = Lock a False
+  | otherwise = Lock a b
 
 -- changeCode changes the code of an open lock. If the lock is closed,
 -- nothing happens.
 changeCode :: String -> Lock -> Lock
-changeCode = todo
+changeCode new_code (Lock a b)
+  | b = Lock new_code b
+  | otherwise = Lock a b
 
 ------------------------------------------------------------------------------
 -- Ex 7: Here's a type Text that just wraps a String. Implement an Eq
@@ -148,6 +171,24 @@ changeCode = todo
 
 data Text = Text String
   deriving Show
+
+instance Eq Text where
+  Text "" == Text "" = True
+  Text [x] == Text [y]
+    | isSpace x && isSpace y = True
+    | otherwise = x == y
+
+  Text x == Text (y:ys)
+    | x == "" = isSpace y && Text x == Text ys
+  
+  Text (x:xs) == Text y
+    | y == "" = isSpace x && Text xs == Text y
+
+  Text (x:xs) == Text (y:ys)
+    | x == y = Text xs == Text ys
+    | isSpace x = Text xs == Text (y:ys)
+    | isSpace y = Text (x:xs) == Text ys
+    | otherwise = False
 
 
 ------------------------------------------------------------------------------
@@ -182,7 +223,17 @@ data Text = Text String
 --       ==> [("a",1),("b",2)]
 
 compose :: (Eq a, Eq b) => [(a,b)] -> [(b,c)] -> [(a,c)]
-compose = todo
+compose [] y = []
+compose [(x1,x2)] y = 
+  case lookup x2 y
+  of Nothing -> []
+     Just k -> [(x1,k)]
+
+
+  -- | isNothing (lookup x2 y) = []
+  -- | otherwise = let Just k = lookup x2 y
+  --               in [(x1,k)]
+compose (x:xs) y = compose [x] y ++ compose xs y
 
 ------------------------------------------------------------------------------
 -- Ex 9: Reorder a list using a list of indices.
