@@ -54,7 +54,9 @@ statements xs ys = (liftA2 (\a b -> a ++ " is " ++ b) xs ys) ++ (liftA2 (\a b ->
 --  calculator "double" "7x"  ==> Nothing
 
 calculator :: String -> String -> Maybe Int
-calculator = todo
+calculator opStr numStr = 
+  liftA2 doCal (makeOp opStr) (readMaybe numStr)
+  where doCal f n = f n
 
 ------------------------------------------------------------------------------
 -- Ex 4: Safe division. Implement the function validateDiv that
