@@ -99,17 +99,57 @@ propSort :: NonEmptyList Int -> Property
 propSort (NonEmpty xs) =
   forAll (elements xs) (\x -> elem x (sort xs))
 
+
+-- quickCheck의 verbose가 부족하면 추가 출력문을 넣을 수 있다
+-- counterexample :: Testable prop => String -> prop -> Property
+
 propRevTwo' :: [Int] -> [Int] -> Property
 propRevTwo' xs ys =
   let input = xs ++ ys
   in counterexample ("Input: " ++ show input) $
      rev input === rev ys ++ rev xs
 
+-- *Examples.QuickCheck> quickCheck propRevTwo'
+-- *** Failed! Falsified (after 4 tests and 5 shrinks):
+-- [0]
+-- [0,1]
+-- Input: [0,0,1]
+-- [0,1,0] /= [1,0,0]
+
+
+
+-- Gen 은 Monad 다. 진짜 지긋지긋하네
+-- sample 을 쓰면 어떤 임의의 값을 입력하는지 볼 수 있다
+
 someLetters :: Gen String
 someLetters = do
   c <- elements "xyzw"
   n <- choose (1,10)
   return (replicate n c)
+
+-- *Examples.QuickCheck> sample someLetters
+-- "yyyyyyyy"
+-- "zzzzzzzzz"
+-- "xxxxxxxxx"
+-- "yyyyyyy"
+-- "yyy"
+-- "ww"
+-- "xxxxxx"
+-- "yyy"
+-- "yyyyyyy"
+-- "xxxxxxxxxx"
+-- "y"
+
+-- Gen 즉 generator 는 Arbitrary 라는 타입 클래스와 연관있다
+-- Arbitrary는 QuickCheck이 입력을 자동으로 생성하는지를 보여준다
+
+-- class Arbitrary a where
+--   arbitrary :: Gen a
+--   shrink :: a -> [a]
+
+-- 내가 만든 데이터 타입으로 테스트하고 싶다면
+-- forAll을 쓰거나
+-- 그 타입에서 Arbitrary instance를 구현해야함
 
 data Switch = On | Off
   deriving (Show, Eq)
@@ -120,6 +160,8 @@ toggle Off = On
 
 propToggleTwice :: Switch -> Property
 propToggleTwice s = s === toggle (toggle s)
+
+-- 여기까지만 하면 에러
 
 instance Arbitrary Switch where
   arbitrary = elements [On,Off]
