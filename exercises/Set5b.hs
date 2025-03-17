@@ -186,8 +186,19 @@ walk = todo
 --
 --   set [StepL,StepR] 1 (Node 0 Empty Empty)  ==>  (Node 0 Empty Empty)
 
+--인자 3개 [변경할 경로], 변경하려는 새값, 트리 a를 받아, 변경 후 트리a를 반환하는 함수
 set :: [Step] -> a -> Tree a -> Tree a
-set path val tree = todo
+set [] val Empty = Empty-- 빈 트리에서 경로가 빈 리스트[]면, 그대로 반환
+set [] val (Node _ left right) = Node val left right-- 경로가 빈 리스트[]면 현재 노드의 값(x)을 Val로 변경
+
+set (StepL:steps) val (Node x left right) = 
+  Node x (set steps val left) right-- 첫 경로가 StepL이면, left에 nVal과 함께 set함수 적용
+
+set (StepR:steps) val (Node x left right) = 
+  Node x left (set steps val right)-- 반대로 StepR이면 right에 set 함수 적용
+
+set _ _ Empty = Empty-- 경로가 트리 범위를 벗어나면 Empty 반환
+
 
 ------------------------------------------------------------------------------
 -- Ex 10: given a value and a tree, return a path that goes from the
